@@ -1,0 +1,7 @@
+﻿Custom blocky farm art pass.
+Generated locally by scripts/generate-custom-farm-art.ps1.
+Designed to match TILE_W=72, TILE_H=36, TILE_DEPTH=5 in src/game/config.ts.
+Terrain tiles are painted at 4x source resolution, then displayed down in Phaser for sharper zoomed gameplay.
+World backdrop is a custom high-resolution generated painting, not premade art.
+Includes terrain, crop, and first building sprites.
+No premade external art source.
