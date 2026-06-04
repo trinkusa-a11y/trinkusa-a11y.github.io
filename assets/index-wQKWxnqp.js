@@ -178,4 +178,4 @@ ${Pt(this.getLuckyWheelRemaining())}`),w.setText(`Laimėjai: ${r}.`),this.say(`L
 .mu-empty { color: #5a4326; font-size: 13px; text-align: center; padding: 14px; }
 .mu-visit-bar { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); z-index: 60; display: flex; gap: 10px; align-items: center; background: #6b4822; border: 2px solid #e1c180; border-radius: 10px; padding: 6px 10px 6px 14px; font-family: Arial, sans-serif; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,.4); }
 .mu-visit-bar span { font-weight: bold; font-size: 14px; }
-`,document.head.appendChild(g)}const cc={type:q.AUTO,parent:"app",width:1280,height:720,backgroundColor:"#4f8a32",scene:uc,scale:{mode:q.Scale.FIT,autoCenter:q.Scale.CENTER_BOTH}},vc=new q.Game(cc);window.__game=vc;Cf();fc();
+`,document.head.appendChild(g)}const cc={type:q.AUTO,parent:"app",width:1280,height:720,backgroundColor:"#4f8a32",scene:uc,scale:{mode:q.Scale.FIT,autoCenter:q.Scale.CENTER_BOTH}};new q.Game(cc);Cf();fc();
