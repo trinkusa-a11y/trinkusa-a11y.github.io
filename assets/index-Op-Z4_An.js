@@ -224,7 +224,6 @@ ${l}`}class $t extends Error{constructor({message:e,code:r,cause:y,name:T}){var 
       <div class="hud-plokste">${ve("coin")}<span class="hud-monetos"></span></div>
       <div class="hud-plokste">${ve("diamond")}<span class="hud-deimantai"></span></div>
       <button class="hud-vardas" title="Spausk ir pervadink ūkį"></button>
-      <button class="hud-pagalba" data-mygtukas="pagalba" title="Kaip žaisti">${ve("help")}</button>
     </div>
     <div class="hud-zinutes">
       <div class="hud-zinute hud-zoom-zinute" hidden>🔍 <span class="hud-zoom-tekstas"></span></div>
@@ -232,6 +231,7 @@ ${l}`}class $t extends Error{constructor({message:e,code:r,cause:y,name:T}){var 
     <div class="hud-desine">
       <div class="hud-meniu">
         ${r("krautuve","Krautuvė","shop")}
+        <button class="hud-mygtukas hud-pagalba" data-mygtukas="pagalba" title="Kaip žaisti">${ve("help")}</button>
         ${r("sandelis","Sandėlis","storage")}
         ${r("bankas","Bankas","bank")}
       </div>
