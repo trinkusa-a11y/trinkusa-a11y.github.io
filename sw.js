@@ -40,6 +40,8 @@ async function apkarpyk(cache) {
   // netrinam niekada — be jo neveiktų atsidarymas be ryšio.
   for (const raktas of raktai.slice(0, raktai.length - MAX_IRASU)) {
     if (raktas.url.endsWith("/index.html")) continue;
+    // Žemėlapio irgi netrinam: be jo nebeliktų pasaulio, o siunčiasi jis 610 KB.
+    if (raktas.url.includes("/zemelapis/")) continue;
     await cache.delete(raktas);
   }
 }
@@ -93,6 +95,34 @@ async function failas(request) {
   return atsakymas;
 }
 
+/**
+ * Žemėlapis: atiduodam iš atminties IŠ KARTO, o naujesnį parsisiunčiam tyliai fone.
+ *
+ * Šitų failų varduose nėra maišos (`zemelapis/tipai.bin`), tad imti vien iš
+ * atminties būtų pavojinga: perpiešus Lietuvą žaidėjas amžinai liktų su senąja.
+ * Bet ir laukti tinklo kas kartą negalima — 610 KB kiekvienam atsidarymui.
+ * Todėl rodom, ką turim, o kitą kartą jau bus naujesnis.
+ */
+async function zemelapis(request) {
+  const cache = await caches.open(CACHE);
+  const issaugotas = await cache.match(request, PAIESKA);
+  const siuntimas = fetch(request)
+    .then((atsakymas) => {
+      if (atsakymas && atsakymas.ok) void cache.put(request, atsakymas.clone());
+      return atsakymas;
+    })
+    .catch(() => null);
+
+  if (issaugotas) {
+    void siuntimas;
+    return issaugotas;
+  }
+  const atsakymas = await siuntimas;
+  if (atsakymas) return atsakymas;
+  // Nėra nei atmintyje, nei tinkle — žaidimas tai atlaiko ir piešia senąjį foną.
+  return new Response("", { status: 504 });
+}
+
 self.addEventListener("fetch", (event) => {
   const request = event.request;
   if (request.method !== "GET") return;
@@ -103,6 +133,11 @@ self.addEventListener("fetch", (event) => {
 
   if (request.mode === "navigate" || url.pathname.endsWith(".html")) {
     event.respondWith(puslapis(request));
+    return;
+  }
+
+  if (url.pathname.includes("/zemelapis/")) {
+    event.respondWith(zemelapis(request));
     return;
   }
 
