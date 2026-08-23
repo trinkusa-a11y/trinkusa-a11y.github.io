@@ -14,7 +14,14 @@
 const CACHE = "mano-ukis-v1";
 // Kiek failų daugiausia laikom. Kiekviena nauja versija atneša naujus vardus,
 // tad be ribos atmintis augtų be galo.
-const MAX_IRASU = 60;
+//
+// Buvo 60 — tiek pakako, kol dailė buvo piešiama kodu. Dabar vien objektų
+// paveikslėlių (augalai, medžiai, pastatai, žemės plytelės) yra per 240, tad su
+// senąja riba jie vienas kitą išstumdavo ir kaskart būdavo siunčiami iš naujo.
+//
+// Pridėjus naujos dailės ŠITĄ SKAIČIŲ reikia peržiūrėti: jis turi būti didesnis
+// už visų failų kiekį, antraip talpykla ima veikti prieš save.
+const MAX_IRASU = 420;
 
 self.addEventListener("install", (event) => {
   // Naujas darbuotojas perima iš karto: `index.html` vis tiek imamas iš tinklo,
