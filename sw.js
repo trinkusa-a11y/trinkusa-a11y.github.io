@@ -12,16 +12,32 @@
 //   • Viskas kita (Supabase, kiti serveriai) čia net neliečiama.
 
 const CACHE = "mano-ukis-v1";
-// Kiek failų daugiausia laikom. Kiekviena nauja versija atneša naujus vardus,
-// tad be ribos atmintis augtų be galo.
+
+// KIEK FAILŲ DAUGIAUSIA LAIKOM.
 //
-// Buvo 60 — tiek pakako, kol dailė buvo piešiama kodu. Dabar vien objektų
-// paveikslėlių (augalai, medžiai, pastatai, žemės plytelės) yra per 240, tad su
-// senąja riba jie vienas kitą išstumdavo ir kaskart būdavo siunčiami iš naujo.
+// ŠITAS SKAIČIUS BUVO PAGRINDINĖ LĖTUMO PRIEŽASTIS. Riba buvo 420, o dailės
+// failų tuo metu jau buvo per 3 600. Talpykla niekada nebetilpo: kiekvienas
+// naujai atsiųstas paveikslėlis išstumdavo anksčiau atsiųstą, tad KIEKVIENĄ
+// KARTĄ atidarius žaidimą beveik visa dailė būdavo siunčiama iš naujo. Būtent
+// dėl to po užsklandos dar kelias minutes trūkdavo objektų.
 //
-// Pridėjus naujos dailės ŠITĄ SKAIČIŲ reikia peržiūrėti: jis turi būti didesnis
-// už visų failų kiekį, antraip talpykla ima veikti prieš save.
-const MAX_IRASU = 420;
+// Dabar riba su gera atsarga viršija visų failų kiekį. Rankomis jos prižiūrėti
+// nebereikia: sena dailė išmetama ne pagal skaičių, o pagal VERSIJĄ (žr.
+// `isvalykSenaDaile`) — tai ir tikslu, ir pigu.
+const MAX_IRASU = 12000;
+
+// Kas kelintas įrašas tikrinam, ar neperžengta riba.
+//
+// Anksčiau tikrinta po KIEKVIENO failo, o tikrinimas perskaito visus talpyklos
+// raktus. Su keliais tūkstančiais failų tai reiškė kelis tūkstančius pilnų
+// sąrašo perskaitymų per vieną atidarymą — ir pats aptarnaujantis darbuotojas
+// tapdavo siaurąja vieta, per kurią eina visos dailės užklausos.
+const TIKRINAM_KAS = 500;
+let nuoPaskutinioTikrinimo = 0;
+
+// Kurią dailės versiją matėm paskutinę. Dailės adresuose yra `?v=61`, tad
+// pakeitus versiją seni įrašai lieka gulėti negyvi — juos ir išmetam.
+let matytaDailesVersija = null;
 
 self.addEventListener("install", (event) => {
   // Naujas darbuotojas perima iš karto: `index.html` vis tiek imamas iš tinklo,
@@ -41,16 +57,47 @@ self.addEventListener("activate", (event) => {
 });
 
 async function apkarpyk(cache) {
+  nuoPaskutinioTikrinimo += 1;
+  if (nuoPaskutinioTikrinimo < TIKRINAM_KAS) return;
+  nuoPaskutinioTikrinimo = 0;
+
   const raktai = await cache.keys();
   if (raktai.length <= MAX_IRASU) return;
   // keys() grąžina įdėjimo tvarka, tad seniausi yra priekyje. Puslapio įrašo
   // netrinam niekada — be jo neveiktų atsidarymas be ryšio.
+  const trinam = [];
   for (const raktas of raktai.slice(0, raktai.length - MAX_IRASU)) {
     if (raktas.url.endsWith("/index.html")) continue;
     // Žemėlapio irgi netrinam: be jo nebeliktų pasaulio, o siunčiasi jis 610 KB.
     if (raktas.url.includes("/zemelapis/")) continue;
-    await cache.delete(raktas);
+    trinam.push(cache.delete(raktas));
   }
+  await Promise.all(trinam);
+}
+
+/**
+ * SENOS DAILĖS VERSIJOS IŠMETIMAS.
+ *
+ * Dailės adresas yra `/assets/objects/x.webp?v=61`. Pakeitus versiją visi seni
+ * įrašai tampa negyvi, bet talpykloje lieka gulėti — o jų keli tūkstančiai.
+ * Anksčiau juos pamažu išstumdavo skaičiaus riba, ir kartu su jais išstumdavo
+ * VEIKIANČIĄ naują dailę.
+ *
+ * Dabar paprasčiau: vos pamatom kitokią versiją nei ligšiolinė, vienu ypu
+ * išmetam visus `assets/objects` įrašus su kita versija. Tai daroma vieną
+ * kartą per versijos pasikeitimą, ne per failą.
+ */
+async function isvalykSenaDaile(cache, versija) {
+  if (!versija || versija === matytaDailesVersija) return;
+  matytaDailesVersija = versija;
+  const raktai = await cache.keys();
+  const trinam = [];
+  for (const raktas of raktai) {
+    if (!raktas.url.includes("/assets/objects/")) continue;
+    if (raktas.url.endsWith(`?v=${versija}`)) continue;
+    trinam.push(cache.delete(raktas));
+  }
+  if (trinam.length > 0) await Promise.all(trinam);
 }
 
 // Puslapis atmintyje laikomas VIENU raktu. Kitaip kiekvienas kreipinys su kiek
@@ -88,7 +135,14 @@ async function puslapis(request) {
   }
 }
 
-/** Failai su maiša varde: jei jau turim — atiduodam iš karto. */
+/**
+ * Failai su maiša varde: jei jau turim — atiduodam iš karto.
+ *
+ * ATSAKYMO NEBELAIKOM, KOL ĮRAŠOM. Anksčiau prieš grąžinant paveikslėlį buvo
+ * laukiama, kol jis atsiguls į talpyklą. Vienam failui tai nieko nereiškia, bet
+ * dailės failų yra keli tūkstančiai, ir tas laukimas sudėtas kartu tapo
+ * matomas: naršyklė gaudavo piešinį vėliau, nei jis jau buvo atkeliavęs.
+ */
 async function failas(request) {
   const cache = await caches.open(CACHE);
   const issaugotas = await cache.match(request, PAIESKA);
@@ -96,8 +150,16 @@ async function failas(request) {
 
   const atsakymas = await fetch(request);
   if (atsakymas && atsakymas.ok) {
-    await cache.put(request, atsakymas.clone());
-    void apkarpyk(cache);
+    const kopija = atsakymas.clone();
+    // Įrašom FONE — atsakymas žaidimui atiduodamas tą pačią akimirką.
+    void (async () => {
+      try {
+        await cache.put(request, kopija);
+        await apkarpyk(cache);
+      } catch (klaida) {
+        // Talpykla pilna ar uždrausta — žaidimui tai nesvarbu, failas jau jo.
+      }
+    })();
   }
   return atsakymas;
 }
@@ -149,6 +211,13 @@ self.addEventListener("fetch", (event) => {
   }
 
   if (url.pathname.includes("/assets/") || /\.(png|jpg|jpeg|webp|svg|woff2?)$/.test(url.pathname)) {
+    // Pamatę naują dailės versiją, senąją išmetam vienu ypu (žr. isvalykSenaDaile).
+    if (url.pathname.includes("/assets/objects/")) {
+      const versija = url.searchParams.get("v");
+      if (versija && versija !== matytaDailesVersija) {
+        event.waitUntil(caches.open(CACHE).then((cache) => isvalykSenaDaile(cache, versija)));
+      }
+    }
     event.respondWith(failas(request));
   }
 });
