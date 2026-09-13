@@ -117,7 +117,14 @@ const PAIESKA = { ignoreVary: true };
 async function puslapis(request) {
   const cache = await caches.open(CACHE);
   try {
-    const atsakymas = await fetch(request);
+    // `no-store`: puslapio NIEKADA neimam iš naršyklės talpyklos.
+    //
+    // GitHub Pages prie index.html prisega `max-age=600`, tad paprastas
+    // `fetch` dešimt minučių atiduoda SENĄ puslapį — o jame surašyti senų failų
+    // vardai. Žaidėjui tai reiškia, kad pataisymas jo nepasiekia, nors serveryje
+    // jau guli. Patikrinta 2026-09-13: naujas žaidimas buvo gyvas, o naršyklė
+    // atkakliai kraudavo vakarykštį.
+    const atsakymas = await fetch(request, { cache: "no-store" });
     if (atsakymas && atsakymas.ok) {
       const kunas = await atsakymas.clone().arrayBuffer();
       const kopija = new Response(kunas, {
