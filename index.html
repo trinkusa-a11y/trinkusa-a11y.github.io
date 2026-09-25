@@ -16,19 +16,78 @@
     <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png" />
     <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
     <title>Mano Ukis Remake</title>
-    <script type="module" crossorigin src="/assets/index-C1TTspX-.js"></script>
+    <!--
+      KROVIMO UŽSKLANDA — PAČIAME PUSLAPYJE, NE ŽAIDIMO KODE.
+
+      Anksčiau ją kūrė žaidimo kodas, o jis pasileidžia tik atsisiuntus ~800 KB
+      scenarijų. Paleidimo metu naršyklė užimta ir nieko nepiešia: gyvame
+      puslapyje išmatuota, kad pirmas vaizdas ekrane atsirasdavo po 2,9 s, o
+      užsklanda būdavo nuimama jau po 2,88 s — ji NIEKADA nepasirodydavo.
+      Dabar ji — paprastas HTML su savo stiliumi, tad matoma nuo pirmos
+      akimirkos, o juosta juda net tada, kai naršyklė užsiėmusi (animacija
+      eina per `transform`, jai piešti pagrindinė gija nereikalinga).
+      Valdo ją src/ui/DailesUzsklandaDom.ts.
+    -->
+    <style>
+      #uko-uzsklanda {
+        position: fixed; inset: 0; z-index: 1400;
+        display: flex; align-items: center; justify-content: center;
+        background: radial-gradient(circle at 50% 38%, #3f3018 0%, #241a0c 70%, #180f06 100%);
+        font-family: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+        transition: opacity 0.3s ease;
+        -webkit-user-select: none; user-select: none;
+      }
+      #uko-uzsklanda.uzsklanda-dingsta { opacity: 0; pointer-events: none; }
+      .uzsklandos-vidus { text-align: center; width: min(320px, 76vw); }
+      .uzsklandos-zenklas { font-size: 46px; line-height: 1; }
+      .uzsklandos-vardas {
+        margin: 10px 0 18px; font-size: 26px; font-weight: 700;
+        letter-spacing: 0.04em; color: #f2dfae;
+      }
+      .uzsklandos-juosta {
+        position: relative; height: 8px; border-radius: 99px;
+        background: rgba(255, 240, 205, 0.16); overflow: hidden;
+      }
+      .uzsklandos-pilnas {
+        width: 0%; height: 100%; border-radius: 99px;
+        background: linear-gradient(90deg, #8fbe4e, #d8c063);
+        transition: width 0.25s ease;
+      }
+      /* Kol žaidimo kodas dar tik siunčiamas, tikros pažangos nežinom — per
+         juostą bėga šviesus ruoželis, kad matytųsi, jog kažkas vyksta. */
+      .uzsklandos-juosta::after {
+        content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 35%;
+        border-radius: 99px;
+        background: linear-gradient(90deg, transparent, rgba(242, 223, 174, 0.45), transparent);
+        animation: uzsklandos-begimas 1.3s ease-in-out infinite;
+      }
+      @keyframes uzsklandos-begimas {
+        from { transform: translateX(-100%); }
+        to { transform: translateX(290%); }
+      }
+      .uzsklandos-tekstas { margin-top: 10px; font-size: 13px; color: rgba(242, 223, 174, 0.72); }
+    </style>
+    <script type="module" crossorigin src="/assets/index-CvlNoXHC.js"></script>
     <link rel="modulepreload" crossorigin href="/assets/game-catalog-KaJOIx_F.js">
     <link rel="modulepreload" crossorigin href="/assets/phaser-Jt__PiWe.js">
     <link rel="modulepreload" crossorigin href="/assets/supabase-Bfd5Thr0.js">
-    <link rel="modulepreload" crossorigin href="/assets/game-ui-BNGy74Yg.js">
-    <link rel="stylesheet" crossorigin href="/assets/index-Dy5v-1-r.css">
+    <link rel="modulepreload" crossorigin href="/assets/game-ui-xxBz0Ire.js">
+    <link rel="stylesheet" crossorigin href="/assets/index-BvTX-4BJ.css">
   </head>
   <body>
+    <div id="uko-uzsklanda">
+      <div class="uzsklandos-vidus">
+        <div class="uzsklandos-zenklas">🌾</div>
+        <div class="uzsklandos-vardas">Mano Ūkis</div>
+        <div class="uzsklandos-juosta"><div class="uzsklandos-pilnas"></div></div>
+        <div class="uzsklandos-tekstas">Kraunamas žaidimas…</div>
+      </div>
+    </div>
     <div id="app"></div>
     <div id="rotate-hint" aria-hidden="true">
       <div class="rotate-hint__icon">📱↻</div>
       <div class="rotate-hint__text">Pasuk telefoną gulsčiai</div>
       <div class="rotate-hint__sub">Žaidimas geriausiai atrodo plačiame ekrane.</div>
-    </div>
+    </div>
   </body>
 </html>
