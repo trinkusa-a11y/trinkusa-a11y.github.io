@@ -208,6 +208,11 @@ self.addEventListener("fetch", (event) => {
   if (url.origin !== self.location.origin) return;
 
   if (request.mode === "navigate" || url.pathname.endsWith(".html")) {
+    // Atmintyje laikomas TIK žaidimo puslapis. Kiti puslapiai (pvz. garsų
+    // klausymo garsai.html) keliauja tiesiai iš tinklo — kitaip jie būtų
+    // įrašyti vietoj žaidimo, ir be ryšio atsidarytų ne žaidimas.
+    const zaidimas = url.pathname.endsWith("/") || url.pathname.endsWith("/index.html");
+    if (!zaidimas) return;
     event.respondWith(puslapis(request));
     return;
   }

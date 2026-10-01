@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="lt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ūkio garsai</title>
+    <style>
+      :root {
+        --fonas: #2e2010;
+        --kortele: #42301d;
+        --kortele-2: #56402a;
+        --tekstas: #fdf4e2;
+        --blankus: rgba(253, 244, 226, 0.62);
+        --auksas: #f3bf4e;
+        --zalia: #86c455;
+        --linija: rgba(255, 236, 200, 0.18);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0; padding: 16px; background: var(--fonas); color: var(--tekstas);
+        font-family: "Nunito", "Segoe UI", system-ui, sans-serif; line-height: 1.4;
+      }
+      main { max-width: 820px; margin: 0 auto; }
+      h1 { font-size: 24px; margin: 0 0 4px; }
+      h2 { font-size: 19px; margin: 24px 0 8px; }
+      h3 { font-size: 15px; margin: 14px 0 6px; color: var(--auksas); }
+      p { color: var(--blankus); margin: 4px 0 10px; }
+      .kortele { background: var(--kortele); border: 1px solid var(--linija); border-radius: 14px; padding: 12px 14px; }
+      .eilute { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--linija); flex-wrap: wrap; }
+      .eilute:last-child { border-bottom: none; }
+      .vardas { flex: 1 1 160px; font-weight: 700; }
+      button {
+        font: inherit; font-weight: 800; font-size: 14px; color: var(--tekstas); cursor: pointer;
+        background: var(--kortele-2); border: 1px solid var(--linija); border-radius: 10px;
+        padding: 9px 12px; min-height: 40px;
+      }
+      button:hover { filter: brightness(1.12); }
+      button.naujas { background: #4e8a2c; }
+      button.senas { background: #5a4a38; color: var(--blankus); }
+      button.pasirinktas { background: var(--auksas); color: #402a06; }
+      .stiliai { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+      .busena { margin-top: 10px; color: var(--auksas); font-weight: 700; min-height: 1.4em; }
+      .kuriniai { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+      .kuriniai button { text-align: left; }
+      .matas { color: var(--blankus); font-size: 12px; font-weight: 600; min-width: 92px; text-align: right; }
+    </style>
+    <script type="module" crossorigin src="/assets/garsai-BMQATO42.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/game-catalog-e_MN8g1n.js">
+    <link rel="modulepreload" crossorigin href="/assets/phaser-Jt__PiWe.js">
+    <link rel="modulepreload" crossorigin href="/assets/supabase-Bfd5Thr0.js">
+    <link rel="modulepreload" crossorigin href="/assets/game-ui-BO6pB56_.js">
+    <link rel="modulepreload" crossorigin href="/assets/Grotuvas-_2RuMTqg.js">
+  </head>
+  <body>
+    <main>
+      <h1>🎵 Ūkio garsai — klausymas</h1>
+      <p>
+        Čia galima išgirsti naują žaidimo muziką ir garsus, o šalia — senuosius, kad būtų aišku, kas
+        pasikeitė. Pirmas paspaudimas įjungia garsą (taip reikalauja naršyklė).
+      </p>
+
+      <h2>Muzika</h2>
+      <div class="kortele">
+        <p>Pasirink stilių, tada spausk kūrinį. Žaidime kūriniai groja po vieną, su ilga tyla tarp jų.</p>
+        <div class="stiliai" id="stiliai"></div>
+        <div id="kuriniai"></div>
+        <h3>Senoji muzika (palyginimui)</h3>
+        <div class="stiliai" id="sena"></div>
+        <div class="stiliai"><button id="stop">⏹ Sustabdyti muziką</button></div>
+        <div class="busena" id="busena"></div>
+      </div>
+
+      <h2>Veiksmų garsai</h2>
+      <div class="kortele" id="veiksmai"></div>
+
+      <h2>Gyvūnai</h2>
+      <div class="kortele" id="gyvunai"></div>
+    </main>
+  </body>
+</html>
